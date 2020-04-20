@@ -4,11 +4,13 @@ import PropTypes from 'prop-types';
 import validate from 'validate.js';
 import { makeStyles } from '@material-ui/styles';
 
-import { ToastContainer, toast } from 'react-toastify';
+// import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import setAuthToken from '../../common/setAuthToken';
+import jwt_decode from 'jwt-decode';
 
-import Alert from '../../common/Alert'
+// import Alert from '../../common/Alert'
 
 import {
   Grid,
@@ -16,8 +18,8 @@ import {
   IconButton,
   TextField,
   Link,
-  FormHelperText,
-  Checkbox,
+  // FormHelperText,
+  // Checkbox,
   Typography
 } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
@@ -35,7 +37,7 @@ const schema = {
     format: {
       pattern: /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/,
       message: function(value, attribute, validatorOptions, attributes, globalOptions) {
-        return validate.format("Password must have at least 6 characters, a number, a lowercase and an uppercase letter.", {
+        return validate.format("must have at least 6 characters, a number, a lowercase and an uppercase letter.", {
           num: value
         });
       }
@@ -166,19 +168,19 @@ const SignUp = props => {
   const [formState, setFormState] = useState({
     isValid: false,
     values: {
-      firstName: '',
-      lastName: '',
       email: '',
       password: ''
     },
     touched: {},
     errors: {},
     emailError: '',
-    success: false
+    success: false,
+    isAuthenticated: false,
+    user: {}
   });
 
-  console.log(formState.success)
-  // console.log(formState.emailError)
+  // console.log(formState.isAuthenticated)
+  // console.log(formState.user)
 
   useEffect(() => {
     const errors = validate(formState.values, schema);
@@ -189,21 +191,6 @@ const SignUp = props => {
       errors: errors || {}
     }));
   }, [formState.values]);
-
-  const users = [
-    {
-      id: 1,
-      email: 'hello'
-    },
-    {
-      id: 2,
-      email: 'hello2'
-    },
-    {
-      id: 3,
-      email: 'hello3'
-    },
-  ]
 
   const handleChange = event => {
     event.persist();
@@ -229,11 +216,22 @@ const SignUp = props => {
     history.goBack();
   };
 
+  const userAuthentication = (token) => {
+    // Set token to ls
+    localStorage.setItem('jwtToken', token);
+    // Set token to Auth header
+    setAuthToken(token);
+    // Decode token to get user data
+    const decoded = jwt_decode(token);
+    setFormState(formState => ({
+      ...formState,
+      isAuthenticated: true ? true : false,
+      user: decoded
+    }));
+  }
+
   const handleSignUp = event => {
     event.preventDefault();
-
-    // const firstName = formState.values.firstName
-    // const lastName = formState.values.lastName
 
     const userData = {
       email: formState.values.email,
@@ -241,11 +239,9 @@ const SignUp = props => {
     }
     Axios.post('http://localhost:3001/api/signup', userData)
     .then(res => {
-      history.push('/')
-      // setFormState(formState => ({
-      //   ...formState,
-      //   success: true
-      // }));
+      const { token } = res.data;
+      userAuthentication(token)
+      history.push('/dashboard')
     })
     .catch(err => {
       const emailError = err.response.data.message;
@@ -258,12 +254,6 @@ const SignUp = props => {
 
   const hasError = field =>
     formState.touched[field] && formState.errors[field] ? true : false;
-
-
-    const notify = () => 
-      toast("Wow so easy !")
-      
-      ;
 
   return (
     <div className={classes.root}>
