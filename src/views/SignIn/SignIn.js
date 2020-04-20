@@ -182,7 +182,7 @@ const SignIn = props => {
     }
     Axios.post('http://localhost:3001/api/login', userData)
     .then(res => console.log(res.data))
-    .catch(err => console.log(err))
+    .catch(err => console.log(err.response.data.message))
     // history.push('/');
   };
 
@@ -254,7 +254,7 @@ const SignIn = props => {
                 >
                   
                 </Typography>
-                <Grid
+                {/* <Grid
                   className={classes.socialButtons}
                   container
                   spacing={2}
@@ -280,14 +280,14 @@ const SignIn = props => {
                       Login with Google
                     </Button>
                   </Grid>
-                </Grid>
+                </Grid> */}
                 <Typography
                   align="center"
                   className={classes.sugestion}
                   color="textSecondary"
                   variant="body1"
                 >
-                  or use email address
+                  Use email address
                 </Typography>
                 <TextField
                   className={classes.textField}

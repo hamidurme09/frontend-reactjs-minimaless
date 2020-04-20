@@ -4,6 +4,10 @@ import PropTypes from 'prop-types';
 import validate from 'validate.js';
 import { makeStyles } from '@material-ui/styles';
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
 import Alert from '../../common/Alert'
 
 import {
@@ -169,11 +173,12 @@ const SignUp = props => {
     },
     touched: {},
     errors: {},
-    emailError: ''
+    emailError: '',
+    success: false
   });
 
-  console.log(formState.errors)
-  console.log(formState.emailError)
+  console.log(formState.success)
+  // console.log(formState.emailError)
 
   useEffect(() => {
     const errors = validate(formState.values, schema);
@@ -216,35 +221,13 @@ const SignUp = props => {
         ...formState.touched,
         [event.target.name]: true
       },
-      emailError: ''
+      emailError: '',
     }));
   };
 
   const handleBack = () => {
     history.goBack();
   };
-
-  const alertNotify = () => {
-    return(
-      <Alert 
-        style={{
-          backgroundColor: 'lightgreen',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          position: 'absolute',
-          top: 100,
-          right: 0,
-          width: 280,
-          // border: '1px solid white',
-          borderRadius: 5,
-          padding: 10
-          }} 
-          header='congratulations' 
-          title='You have signed up successfully.' 
-      />
-    )
-  }
 
   const handleSignUp = event => {
     event.preventDefault();
@@ -258,8 +241,11 @@ const SignUp = props => {
     }
     Axios.post('http://localhost:3001/api/signup', userData)
     .then(res => {
-      // history.push('/')
-      alertNotify()
+      history.push('/')
+      // setFormState(formState => ({
+      //   ...formState,
+      //   success: true
+      // }));
     })
     .catch(err => {
       const emailError = err.response.data.message;
@@ -273,25 +259,14 @@ const SignUp = props => {
   const hasError = field =>
     formState.touched[field] && formState.errors[field] ? true : false;
 
+
+    const notify = () => 
+      toast("Wow so easy !")
+      
+      ;
+
   return (
     <div className={classes.root}>
-      <Alert 
-        style={{
-          backgroundColor: 'lightgreen',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          position: 'absolute',
-          top: 100,
-          right: 0,
-          width: 280,
-          // border: '1px solid white',
-          borderRadius: 5,
-          padding: 10
-          }} 
-          header='congratulations' 
-          title='You have signed up successfully.' 
-      />
       <Grid
         className={classes.grid}
         container
